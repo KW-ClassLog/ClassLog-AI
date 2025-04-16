@@ -33,3 +33,10 @@
  ┣ 📄main.py           # 진입점
  ┣ 📄requirements.txt  # Python 의존성 목록
  ┗ 📄README.md
+
+## 🛠️ 설치 및 실행 가이드
+
+1. 서버 빌드 및 실행
+```bash
+pip install -r requirements.txt # 관련 패키지 다운
+```
