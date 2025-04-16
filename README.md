@@ -34,6 +34,8 @@
  ┣ 📄requirements.txt  # Python 의존성 목록
  ┗ 📄README.md
 
+```
+
 ## 🛠️ 설치 및 실행 가이드
 
 1. 서버 빌드 및 실행
