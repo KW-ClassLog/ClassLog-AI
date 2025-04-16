@@ -1,5 +1,3 @@
-# ClassLog-AI
-
 <div align="center">
 
   <h2>ClassLog-AI | 클래스로그 인공지능 모듈</h2>
