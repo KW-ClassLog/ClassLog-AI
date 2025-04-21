@@ -1,3 +1,5 @@
+lecture_memories = {}
+
 # 퀴즈 생성을 위한 프롬프트 구성 + 이전 퀴즈 저장용 클래스
 class QuizMemory:
     def __init__(self):
@@ -63,3 +65,9 @@ class QuizMemory:
     🎧 음성 텍스트 (보조 참고용):
     {audio_text}
     """
+
+# 강의별 메모리 저장소 분리
+def get_lecture_memory(lecture_id: str) -> QuizMemory:
+    if lecture_id not in lecture_memories:
+        lecture_memories[lecture_id] = QuizMemory()
+    return lecture_memories[lecture_id]
