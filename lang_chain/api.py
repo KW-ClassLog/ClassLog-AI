@@ -11,7 +11,7 @@ import os
 load_dotenv()
 
 
-DOCUMENT_PATH = "/Users/haemin/haemin/KWU/4-1/산학협력캡스톤/test_api/test_input/15주차+핵심정리+다운로드.pdf"
+DOCUMENT_PATH = os.getenv("DOCUMENT_PATH")
 AUDIO_PATH = os.getenv("AUDIO_PATH")
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 WHISPER_API_KEY = os.getenv("WHISPER_API_KEY")
@@ -45,8 +45,15 @@ def regenerate_quiz(lecture_id: str = Query(...)):
     memory = get_lecture_memory(lecture_id)
     raw_text = pipeline.invoke({"memory": memory})
     parsed = parse_quiz_output(raw_text)
-    memory.add(raw_text)
     return {"quizzes": parsed, "status": f"재생성 퀴즈 {regenerate_count[lecture_id]}회차 완료"}
+
+# 메모리 초기화
+@app.post("/reset-quiz-memory")
+def reset_quiz_memory(lecture_id: str = Query(...)):
+    if lecture_id in lecture_memories:
+        del lecture_memories[lecture_id]
+        return {"message": f"{lecture_id}의 퀴즈 메모리를 초기화했습니다."}
+    return {"message": f"{lecture_id}에 해당하는 메모리가 없습니다."}
 
 # 퀴즈 저장 메모리 확인(test용)
 @app.get("/quiz-history")
