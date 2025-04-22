@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Body
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from lang_chain.pipeline import build_pipeline_with_memory
@@ -10,25 +10,37 @@ import os
 
 load_dotenv()
 
-
-DOCUMENT_PATH = os.getenv("DOCUMENT_PATH")
-AUDIO_PATH = os.getenv("AUDIO_PATH")
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 WHISPER_API_KEY = os.getenv("WHISPER_API_KEY")
-USE_AUDIO = os.getenv("USE_AUDIO", "False").lower() == "true"
 
 app = FastAPI()
-pipeline = build_pipeline_with_memory(DOCUMENT_PATH, AUDIO_PATH, USE_AUDIO, OPENROUTER_API_KEY, WHISPER_API_KEY)
 regenerate_count = {}
 
 class QuizResponse(BaseModel):
     quizzes: list[dict]
     status: str
 
+class QuizRequest(BaseModel):
+    document_path: str
+    use_audio: bool
+    audio_path: str | None = None
+
 # 퀴즈 생성 API
-@app.get("/generate-quiz", response_model=QuizResponse)
-def generate_quiz(lecture_id: str = Query(...)):
+@app.post("/generate-quiz", response_model=QuizResponse)
+def generate_quiz(
+    lecture_id: str = Query(...),
+    request: QuizRequest = Body(...)
+):    
     regenerate_count[lecture_id] = 0
+
+    pipeline = build_pipeline_with_memory(
+        request.document_path,
+        request.audio_path if request.use_audio else None,
+        request.use_audio,
+        OPENROUTER_API_KEY,
+        WHISPER_API_KEY
+    )
+
     memory = get_lecture_memory(lecture_id)
     raw_text = pipeline.invoke({"memory": memory})
     parsed = parse_quiz_output(raw_text)
@@ -36,12 +48,25 @@ def generate_quiz(lecture_id: str = Query(...)):
     return {"quizzes": parsed, "status": "초기 퀴즈 생성 완료"}
 
 # 퀴즈 재생성 API
-@app.get("/regenerate-quiz", response_model=QuizResponse)
-def regenerate_quiz(lecture_id: str = Query(...)):
+@app.post("/regenerate-quiz", response_model=QuizResponse)
+def regenerate_quiz(
+    lecture_id: str = Query(...),
+    request: QuizRequest = Body(...)
+):    
     count = regenerate_count.get(lecture_id, 0)
     if count >= 1:
         return {"quizzes": [], "status": "더 이상 퀴즈를 재생성할 수 없습니다."}
+    
     regenerate_count[lecture_id] = count + 1
+
+    pipeline = build_pipeline_with_memory(
+        request.document_path,
+        request.audio_path if request.use_audio else None,
+        request.use_audio,
+        OPENROUTER_API_KEY,
+        WHISPER_API_KEY
+    )
+
     memory = get_lecture_memory(lecture_id)
     raw_text = pipeline.invoke({"memory": memory})
     parsed = parse_quiz_output(raw_text)
