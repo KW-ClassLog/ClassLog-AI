@@ -1,27 +1,17 @@
-# 사용 라이브러리
-# Web framework
-fastapi
-uvicorn
-
-# OCR and image handling
-pytesseract
-pdf2image
-Pillow
-
-# Audio processing
-pydub
-tqdm
-
-# LangChain and LLM
-openai
-langchain
-
-# Document conversion
-python-docx
-docx2pdf
-
-# Environment variable management
-python-dotenv
-
-# Data validation and typing
-pydantic
+# 사용 패키지
+docx2pdf==0.1.8
+fastapi==0.115.12
+langchain==0.3.23
+langchain-core==0.3.51
+langchain-text-splitters==0.3.8
+openai==1.71.0
+pdf2image==1.17.0
+pydantic==2.11.1
+pydantic_core==2.33.0
+pydub==0.25.1
+pytesseract==0.3.13
+python-dotenv==1.1.0
+requests==2.32.3
+requests-toolbelt==1.0.0
+tqdm==4.67.1
+uvicorn==0.34.1

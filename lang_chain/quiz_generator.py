@@ -3,8 +3,8 @@ from lang_chain.memory import QuizMemory
 import re
 
 
-# 퀴즈 생성 + 메모리 저장 함수
-def generate_quiz_with_memory(document_text: str, audio_text: str, memory: QuizMemory, api_key: str, model="deepseek/deepseek-chat-v3-0324:free") -> str:
+# 퀴즈 생성 함수
+def generate_quiz(document_text: str, audio_text: str, memory: QuizMemory, api_key: str, model="deepseek/deepseek-chat-v3-0324:free") -> str:
     prompt = memory.get_prompt(document_text, audio_text)
 
     headers = {
@@ -21,7 +21,6 @@ def generate_quiz_with_memory(document_text: str, audio_text: str, memory: QuizM
     response.raise_for_status()
 
     result = response.json()["choices"][0]["message"]["content"]
-    memory.add(result)
 
     # deepseek 퀴즈 응답 터미널에 출력
     print("===== 퀴즈 응답 =====")
