@@ -17,8 +17,8 @@ app = FastAPI()
 regenerate_count = {}
 
 class QuizResponse(BaseModel):
+    lecture_id: str
     quizzes: list[dict]
-    status: str
 
 class QuizRequest(BaseModel):
     document_path: str
@@ -45,7 +45,7 @@ def generate_quiz(
     raw_text = pipeline.invoke({"memory": memory})
     parsed = parse_quiz_output(raw_text)
     memory.add(raw_text)
-    return {"quizzes": parsed, "status": "초기 퀴즈 생성 완료"}
+    return {"lecture_id": lecture_id, "quizzes": parsed}
 
 # 퀴즈 재생성 API
 @app.post("/regenerate-quiz", response_model=QuizResponse)
@@ -70,7 +70,7 @@ def regenerate_quiz(
     memory = get_lecture_memory(lecture_id)
     raw_text = pipeline.invoke({"memory": memory})
     parsed = parse_quiz_output(raw_text)
-    return {"quizzes": parsed, "status": f"재생성 퀴즈 {regenerate_count[lecture_id]}회차 완료"}
+    return {"lecture_id": lecture_id, "quizzes": parsed}
 
 # 메모리 초기화
 @app.post("/reset-quiz-memory")
