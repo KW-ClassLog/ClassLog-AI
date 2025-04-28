@@ -1,4 +1,5 @@
-from lang_chain.memory import QuizMemory
+from app.core.memory import QuizMemory
+import requests
 
 # 퀴즈 생성 함수
 def generate_quiz(document_text: str, audio_text: str, memory: QuizMemory, api_key: str, model="deepseek/deepseek-chat-v3-0324:free") -> str:

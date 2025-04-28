@@ -1,10 +1,13 @@
 from fastapi import APIRouter, Query, Body
 from pydantic import BaseModel
+from dotenv import load_dotenv
 from app.pipeline.pipeline import build_pipeline_with_memory
 from app.utils.parse_utils import parse_quiz_output
 from app.core.memory import get_lecture_memory, lecture_memories
 from fastapi.responses import JSONResponse
 import os
+
+load_dotenv()
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 WHISPER_API_KEY = os.getenv("WHISPER_API_KEY")
