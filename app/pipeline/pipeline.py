@@ -1,8 +1,8 @@
 from langchain.schema.runnable import RunnableLambda, RunnableParallel
-from lang_chain.ocr import process_any_document
-from lang_chain.whisper import transcribe_audio
-from lang_chain.quiz_generator import generate_quiz
-from lang_chain.memory import QuizMemory
+from app.service.ocr_service import process_any_document
+from app.service.whisper_service import transcribe_audio
+from app.service.quiz_generator_service import generate_quiz
+from app.core.memory import QuizMemory
 
 quiz_memory = QuizMemory()
 
