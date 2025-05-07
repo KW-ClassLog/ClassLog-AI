@@ -6,4 +6,4 @@ load_dotenv()
 
 app = FastAPI()
 
-app.include_router(quiz_router, prefix="/api/quizzes")
+app.include_router(quiz_router)
