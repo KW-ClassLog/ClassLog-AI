@@ -1,12 +1,14 @@
-from PIL import Image
 import os
 import tempfile
 import subprocess
+from PIL import Image
 from typing import List
 import pytesseract
-from pdf2image import convert_from_path
+import fitz
+import requests
 from docx2pdf import convert as convert_docx_to_pdf
 from urllib.parse import urlparse
+from io import BytesIO
 
 
 # 이미지 전처리 함수(이진화)
@@ -20,32 +22,52 @@ def extract_text(img: Image.Image):
     config = '--psm 6 -l kor+eng'
     return pytesseract.image_to_string(img, config=config).strip()
 
-# pdf, ppt, docx, hwp -> 이미지 변환 함수
+# PDF -> 이미지로 변환
+def convert_pdf_to_images(pdf_bytes: bytes) -> List[Image.Image]:
+    doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+    images = []
+    for page_num in range(doc.page_count):
+        page = doc.load_page(page_num)
+        pix = page.get_pixmap(dpi=300)
+        img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+        images.append(img)
+    return images
+
+# pdf, ppt, docx, hwp 파일 형식 처리
 def convert_to_images(file_path: str) -> List[Image.Image]:
     file_ext = remove_url_query(file_path)
     ext = os.path.splitext(file_ext)[1].lower()
     if ext == ".pdf":
-        return convert_from_path(file_path, dpi=300)
+        return convert_pdf_to_images_from_url(file_path)
     elif ext == ".pptx":
         return convert_pptx_to_images(file_path)
     elif ext == ".docx":
         with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp_pdf:
             convert_docx_to_pdf(file_path, tmp_pdf.name)
-            return convert_from_path(tmp_pdf.name, dpi=300)
+            return convert_pdf_to_images(tmp_pdf.name)
     elif ext == ".hwp":
         with tempfile.TemporaryDirectory() as tmpdir:
             pdf_path = os.path.join(tmpdir, "converted.pdf")
             libreoffice_convert_to_pdf(file_path, pdf_path)
-            return convert_from_path(pdf_path, dpi=300)
+            return convert_pdf_to_images(pdf_path)
     else:
         raise ValueError(f"지원하지 않는 파일 형식입니다: {ext}")
+    
+# 강의자료 이미지로 변환
+def convert_pdf_to_images_from_url(pdf_url: str) -> List[Image.Image]:
+    response = requests.get(pdf_url)
+    if response.status_code != 200:
+        raise Exception(f"Failed to download file from URL: {pdf_url}")
+    
+    pdf_bytes = BytesIO(response.content)
+    return convert_pdf_to_images(pdf_bytes)
 
 # ppt -> 이미지 변환 함수
 def convert_pptx_to_images(pptx_path: str) -> List[Image.Image]:
     with tempfile.TemporaryDirectory() as tmpdir:
         pdf_path = os.path.join(tmpdir, "converted.pdf")
         libreoffice_convert_to_pdf(pptx_path, pdf_path)
-        return convert_from_path(pdf_path, dpi=300)
+        return convert_pdf_to_images(pdf_path)
 
 # hwp -> pdf 변환 함수(hwp는 이미지로 바로 변환 안 됨)
 def libreoffice_convert_to_pdf(input_path: str, output_path: str):
@@ -62,6 +84,7 @@ def remove_url_query(file_path: str) -> str:
     parsed_url = urlparse(file_path)
     return parsed_url.path
 
+
 # 문서 통합 OCR 처리 함수
 def process_any_document(file_path: str) -> str:
     pages = convert_to_images(file_path)
@@ -70,4 +93,5 @@ def process_any_document(file_path: str) -> str:
         processed = preprocess_image(img)
         text = extract_text(processed)
         texts.append(text if text else "[내용 없음]")
+        
     return "\n\n".join(texts)
