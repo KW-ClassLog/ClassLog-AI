@@ -5,7 +5,6 @@ langchain
 langchain-core
 langchain-text-splitters
 openai
-pdf2image
 pydantic
 pydantic_core
 pydub
@@ -15,3 +14,6 @@ requests
 requests-toolbelt
 tqdm
 uvicorn
+boto3
+PyMuPDF
+pillow
