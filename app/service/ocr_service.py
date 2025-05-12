@@ -86,12 +86,20 @@ def remove_url_query(file_path: str) -> str:
 
 
 # 문서 통합 OCR 처리 함수
-def process_any_document(file_path: str) -> str:
-    pages = convert_to_images(file_path)
-    texts = []
-    for img in pages:
-        processed = preprocess_image(img)
-        text = extract_text(processed)
-        texts.append(text if text else "[내용 없음]")
-        
-    return "\n\n".join(texts)
+def process_any_documents(file_paths_str: str) -> str:
+    file_paths = [url.strip() for url in file_paths_str.split(",") if url.strip()]
+    
+    all_texts = []
+    for file_path in file_paths:
+        try:
+            pages = convert_to_images(file_path)
+            texts = []
+            for img in pages:
+                processed = preprocess_image(img)
+                text = extract_text(processed)
+                texts.append(text if text else "[내용 없음]")
+            all_texts.append("\n\n".join(texts))
+        except Exception as e:
+            all_texts.append(f"[오류 발생: {file_path}]\n{str(e)}")
+    
+    return "\n\n".join(all_texts)
