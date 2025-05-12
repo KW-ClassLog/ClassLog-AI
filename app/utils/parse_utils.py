@@ -17,8 +17,12 @@ def parse_quiz_output(raw_text: str) -> list[dict]:
 
         choices = []
         if "객관식" in qtype_raw:
-            choice_lines = re.findall(r"^\d\.\s+.+", content, re.MULTILINE)
-            choices = [re.sub(r"^\d\.\s*", "", line).strip() for line in choice_lines]
+            choices_block_match = re.search(r"보기:\s*(.*?)(?=정답:)", content, re.DOTALL)
+            choices = []
+            if choices_block_match:
+                choices_block = choices_block_match.group(1).strip()
+                choice_lines = re.findall(r"^\s*\d+\.\s+.+", choices_block, re.MULTILINE)
+                choices = [re.sub(r"^\s*\d+\.\s*", "", line).strip() for line in choice_lines]
 
             if solution_raw.isdigit():
                 idx = int(solution_raw) - 1
@@ -27,7 +31,8 @@ def parse_quiz_output(raw_text: str) -> list[dict]:
                 else:
                     solution = "정답 없음"
             else:
-                solution = re.sub(r"^\d\.\s*", "", solution_raw)
+                solution = re.sub(r"^\s*\d+\.\s*", "", solution_raw).strip()
+                
         else:
             solution = solution_raw
 
