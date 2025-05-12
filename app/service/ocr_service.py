@@ -6,6 +6,8 @@ from typing import List
 import pytesseract
 from pdf2image import convert_from_path
 from docx2pdf import convert as convert_docx_to_pdf
+from urllib.parse import urlparse
+
 
 # 이미지 전처리 함수(이진화)
 def preprocess_image(img: Image.Image):
@@ -20,7 +22,8 @@ def extract_text(img: Image.Image):
 
 # pdf, ppt, docx, hwp -> 이미지 변환 함수
 def convert_to_images(file_path: str) -> List[Image.Image]:
-    ext = os.path.splitext(file_path)[1].lower()
+    file_ext = remove_url_query(file_path)
+    ext = os.path.splitext(file_ext)[1].lower()
     if ext == ".pdf":
         return convert_from_path(file_path, dpi=300)
     elif ext == ".pptx":
@@ -53,6 +56,11 @@ def libreoffice_convert_to_pdf(input_path: str, output_path: str):
         "--outdir", os.path.dirname(output_path),
         input_path
     ], check=True)
+
+# S3 URL 쿼리 파라미터 제거 함수
+def remove_url_query(file_path: str) -> str:
+    parsed_url = urlparse(file_path)
+    return parsed_url.path
 
 # 문서 통합 OCR 처리 함수
 def process_any_document(file_path: str) -> str:
