@@ -8,9 +8,9 @@ services:
     networks:
       - classlog-network
     environment:
-      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}  # OpenRouter API Key (환경 변수에서 가져오기)
-      - WHISPER_API_KEY=${WHISPER_API_KEY}  # Whisper API Key (환경 변수에서 가져오기)
-
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - WHISPER_API_KEY=${OPENAI_API_KEY}
+      
 networks:
   classlog-network:
     driver: bridge

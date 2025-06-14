@@ -2,7 +2,7 @@ from app.core.memory import QuizMemory
 import requests
 
 # 퀴즈 생성 함수
-def generate_quiz(document_text: str, audio_text: str, memory: QuizMemory, api_key: str, model="deepseek/deepseek-chat-v3-0324:free") -> str:
+def generate_quiz(document_text: str, audio_text: str, memory: QuizMemory, api_key: str, model="gpt-4o") -> str:
     prompt = memory.get_prompt(document_text, audio_text)
 
     headers = {
@@ -10,12 +10,13 @@ def generate_quiz(document_text: str, audio_text: str, memory: QuizMemory, api_k
         "Content-Type": "application/json"
     }
 
+
     payload = {
         "model": model,
         "messages": [{"role": "user", "content": prompt}]
     }
 
-    response = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=payload)
+    response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
     response.raise_for_status()
 
     result = response.json()["choices"][0]["message"]["content"]

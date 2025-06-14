@@ -7,6 +7,7 @@ from app.core.memory import QuizMemory
 quiz_memory = QuizMemory()
 
 def build_pipeline_with_memory(document_path: str, audio_path: str, use_audio: bool, api_key: str, whisper_key: str):
+    
     return (
         RunnableParallel({
             "document_text": RunnableLambda(lambda _: process_any_documents(document_path)),
