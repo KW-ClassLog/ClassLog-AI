@@ -94,6 +94,9 @@ def remove_url_query(file_path: str) -> str:
     parsed_url = urlparse(file_path)
     return parsed_url.path
 
+def process_image(img: Image.Image) -> str:
+    processed = preprocess_image(img)
+    return extract_text(processed) or "[내용 없음]"
 
 # 문서 통합 OCR 처리 함수
 def process_any_documents(file_paths_str: str) -> str:
