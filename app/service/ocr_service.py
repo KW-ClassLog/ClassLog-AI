@@ -106,7 +106,7 @@ def process_any_documents(file_paths_str: str) -> str:
     for file_path in file_paths:
         try:
             pages = convert_to_images(file_path)
-            with ThreadPoolExecutor(max_workers=4) as executor:  # 병렬 처리
+            with ThreadPoolExecutor(max_workers=2) as executor:  # 병렬 처리
                 texts = list(executor.map(process_image, pages))
             all_texts.append("\n\n".join(texts))
         except Exception as e:
