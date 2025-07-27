@@ -64,6 +64,10 @@ def regenerate_quiz(lecture_id: str = Query(...), request: QuizRequest = Body(..
     memory = get_lecture_memory(lecture_id)
     raw_text = pipeline.invoke({"memory": memory})
     parsed = parse_quiz_output(raw_text)
+    
+    if lecture_id in lecture_memories:
+        del lecture_memories[lecture_id]
+    
     return {"lecture_id": lecture_id, "quizzes": parsed}
 
 # 강의별 퀴즈 메모리 삭제 API

@@ -9,6 +9,7 @@ import requests
 from docx2pdf import convert as convert_docx_to_pdf
 from urllib.parse import urlparse
 from io import BytesIO
+from concurrent.futures import ThreadPoolExecutor
 
 
 # 이미지 전처리 함수(이진화)
@@ -16,6 +17,10 @@ def preprocess_image(img: Image.Image):
     gray = img.convert("L")
     bw = gray.point(lambda x: 0 if x < 150 else 255, '1')
     return bw
+
+def process_image(img: Image.Image) -> str:
+    processed = preprocess_image(img)
+    return extract_text(processed) or "[내용 없음]"
 
 # 이미지 -> 텍스트 추출 함수(OCR)
 def extract_text(img: Image.Image):
@@ -50,6 +55,11 @@ def convert_to_images(file_path: str) -> List[Image.Image]:
             pdf_path = os.path.join(tmpdir, "converted.pdf")
             libreoffice_convert_to_pdf(file_path, pdf_path)
             return convert_pdf_to_images(pdf_path)
+    elif ext == ".hwpx":
+        with tempfile.TemporaryDirectory() as tmpdir:
+            pdf_path = os.path.join(tmpdir, "converted.pdf")
+            libreoffice_convert_to_pdf(file_path, pdf_path)
+            return convert_pdf_to_images(pdf_path)    
     else:
         raise ValueError(f"지원하지 않는 파일 형식입니다: {ext}")
     
@@ -84,22 +94,22 @@ def remove_url_query(file_path: str) -> str:
     parsed_url = urlparse(file_path)
     return parsed_url.path
 
+def process_image(img: Image.Image) -> str:
+    processed = preprocess_image(img)
+    return extract_text(processed) or "[내용 없음]"
 
 # 문서 통합 OCR 처리 함수
 def process_any_documents(file_paths_str: str) -> str:
     file_paths = [url.strip() for url in file_paths_str.split(",") if url.strip()]
-    
     all_texts = []
+
     for file_path in file_paths:
         try:
             pages = convert_to_images(file_path)
-            texts = []
-            for img in pages:
-                processed = preprocess_image(img)
-                text = extract_text(processed)
-                texts.append(text if text else "[내용 없음]")
+            with ThreadPoolExecutor(max_workers=2) as executor:  # 병렬 처리
+                texts = list(executor.map(process_image, pages))
             all_texts.append("\n\n".join(texts))
         except Exception as e:
             all_texts.append(f"[오류 발생: {file_path}]\n{str(e)}")
-    
+
     return "\n\n".join(all_texts)
