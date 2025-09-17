@@ -4,6 +4,8 @@ fastapi
 langchain
 langchain-core
 langchain-text-splitters
+langchain-community
+langchain-openai
 openai
 pydantic
 pydantic_core
@@ -17,3 +19,6 @@ uvicorn
 boto3
 PyMuPDF
 pillow
+faiss-cpu
+PyPDF2
+pdf2image
