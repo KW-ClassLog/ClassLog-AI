@@ -1,9 +1,12 @@
 FROM python:3.10.13
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     poppler-utils \
-    tesseract-ocr \
-    ffmpeg
+    tesseract-ocr tesseract-ocr-kor \
+    libreoffice \
+    ffmpeg \
+    fonts-nanum fonts-noto-cjk \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /classlog-ai
 
