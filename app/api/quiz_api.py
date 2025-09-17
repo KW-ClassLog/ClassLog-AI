@@ -113,7 +113,6 @@ def regenerate_quiz(lecture_id: str = Query(...), request: QuizRequest = Body(..
             audio_path=request.audio_path,
             use_audio=request.use_audio,
             api_key=OPENAI_API_KEY,
-            whisper_key=OPENAI_API_KEY,
         ).invoke({"memory": memory})
 
         document_text = out["document_text"]
@@ -136,7 +135,6 @@ def regenerate_quiz(lecture_id: str = Query(...), request: QuizRequest = Body(..
                 audio_path=request.audio_path,
                 use_audio=True,
                 api_key=OPENAI_API_KEY,
-                whisper_key=OPENAI_API_KEY,
             ).invoke({"memory": memory})
 
             audio_text = out["audio_text"] or ""
