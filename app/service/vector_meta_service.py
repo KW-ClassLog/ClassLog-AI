@@ -1,6 +1,6 @@
 import os, json, tempfile
 
-VECTOR_DIR = (os.getenv("VECTOR_DIR") or "vectorstores").strip()
+VECTOR_DIR = (os.getenv("VECTOR_DIR") or "/data/vectorstores").strip()
 
 # 강의별 메타 데이터(오디오 저장 여부 담김) 경로 반환
 def meta_path(lecture_id: str) -> str:
