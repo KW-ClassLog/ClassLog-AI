@@ -21,5 +21,16 @@ def load_vectorstore(lecture_id: str, api_key: str) -> FAISS:
     return FAISS.load_local(path, embeddings, allow_dangerous_deserialization=True)
 
 def vectorstore_exists(lecture_id: str) -> bool:
-    path = os.path.join("vectorstores", lecture_id)
-    return os.path.exists(path)
+    base = os.path.join(VECTOR_DIR, lecture_id)
+    faiss_idx      = os.path.join(base, "index.faiss")
+    pkl            = os.path.join(base, "index.pkl")
+    docstore_json  = os.path.join(base, "docstore.json")
+    index_json     = os.path.join(base, "index.json")
+
+    ok = (
+        os.path.isdir(base) and
+        os.path.isfile(faiss_idx) and
+        (os.path.isfile(pkl) or os.path.isfile(docstore_json) or os.path.isfile(index_json))
+    )
+    
+    return ok
