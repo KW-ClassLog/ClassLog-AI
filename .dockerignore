@@ -8,3 +8,5 @@ node_modules/
 .git/
 *.log
 vectorstores/
+eval/
+samples/
