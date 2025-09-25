@@ -43,10 +43,7 @@ def get_has_audio(lecture_id: str) -> bool:
 
 # has_audio 값 갱신
 def set_has_audio(lecture_id: str, has_audio: bool):
-    """
-    메타데이터의 'has_audio' 플래그 값을 설정한 뒤 저장합니다.
-    - 기존 메타데이터를 읽고, has_audio만 업데이트하여 write_meta로 기록합니다.
-    """
+
     meta = read_meta(lecture_id)
     meta["has_audio"] = bool(has_audio)
     write_meta(lecture_id, meta)
