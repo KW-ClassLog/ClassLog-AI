@@ -8,9 +8,12 @@ services:
     networks:
       - classlog-network
     environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - WHISPER_API_KEY=${OPENAI_API_KEY}
-      
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      VECTOR_DIR: "/data/vectorstores"
+      TESSDATA_PREFIX: "/usr/share/tesseract-ocr/5/tessdata"
+    volumes:
+      - ./data/vectorstores:/data/vectorstores
+
 networks:
   classlog-network:
     driver: bridge

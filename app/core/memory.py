@@ -1,82 +1,49 @@
-lecture_memories = {}
+from typing import Dict, List
 
-# 퀴즈 생성을 위한 프롬프트 구성 + 이전 퀴즈 저장용 클래스
+lecture_memories: Dict[str, "QuizMemory"] = {}
+
+
 class QuizMemory:
-    def __init__(self):
-        self.previous_quizzes = []
+    def __init__(self, max_items: int = 50):
+        """
+        max_items: 보관할 최대 퀴즈 개수 (초과 시 FIFO로 가장 오래된 항목 제거)
+        """
+        self._previous_quizzes: List[str] = []
+        self._max_items = max_items
 
-    def add(self, quiz_text: str):
-        self.previous_quizzes.append(quiz_text)
+    def add(self, quiz_text: str) -> None:
+        """새로 생성된 퀴즈 텍스트를 추가한다."""
+        if not isinstance(quiz_text, str) or not quiz_text.strip():
+            return
+        self._previous_quizzes.append(quiz_text.strip())
 
-    def get_all(self):
-        return self.previous_quizzes
+        if len(self._previous_quizzes) > self._max_items:
+            overflow = len(self._previous_quizzes) - self._max_items
+            del self._previous_quizzes[:overflow]
 
-    def get_prompt(self, document_text: str, audio_text: str):
-        if self.previous_quizzes:
-            history = "\n\n---\n\n".join(self.previous_quizzes)
-            history_block = f"※ 이전에 생성된 퀴즈는 다음과 같습니다. 동일하거나 유사한 문제는 절대 중복해서 생성하지 마세요.\n\n이전 퀴즈:\n{history}"
-        else:
-            history_block = ""
-        
-        base_intro = "다음은 강의 자료"
-        if audio_text.strip():
-            base_intro += "와 일부 강의 음성 텍스트를 참고하여 만든 콘텐츠입니다.\n음성 텍스트는 강의자료에서 누락된 보조 설명이므로, 퀴즈 생성 시 참고 정도로만 활용해 주세요."
-        else:
-            base_intro += "를 참고하여 만든 콘텐츠입니다."
+    def get_all(self) -> List[str]:
+        return list(self._previous_quizzes)
 
-        return f"""
-    {base_intro}
+    def clear(self) -> None:
+        self._previous_quizzes.clear()
 
-    {history_block}
-
-    다음 조건에 맞는 새로운 퀴즈를 생성해 주세요:
-
-    - 객관식 2문제 (보기 4개, 정답 포함)
-    - 단답형 주관식 1문제 (정답 포함)
-    - 참/거짓 문제 1문제 (정답 포함)
-    - 모든 문항은 반드시 한국어로 작성해 주세요.
-    ※ 마크다운 문법을 사용하지 마세요. 모든 항목은 순수 텍스트로 작성해주세요.
-
-    🔹 단답형 문제 작성 시 주의사항:
-    - 정답이 여러 표현으로 존재하는 경우(예: 배깅, bagging)는 모두 포함하여 `,`로 구분된 하나의 줄로 작성해 주세요.
-    - 단, 여러 개를 작성하시오와 같은 복수입력형 문제가 되지 않도록 해 주세요.  
-    (예: “모두 작성하시오”, “다 고르시오”, “두 가지는 무엇인가요” 등은 절대 사용하지 마세요.)
-    - 문제 문장에도 반드시 "한 가지는 무엇인가요?", "무엇인가요?" 등 단일 정답을 유도하는 표현만 사용해 주세요.
-    - “두 가지”, “세 가지”, “모두”, “각각”, “~와 ~” 등의 표현은 문제 문장에 절대 포함되지 않도록 해 주세요.
-    - 예시 정답: 배깅, bagging
-
-    문장 스타일 지침:
-    - 객관식/주관식 문항은 “~을 고르세요”, “~은 무엇인가요?” 형태의 존댓말로 작성
-    - 참/거짓 문항은 “~이다”, “~하지 않는다” 형태의 평서문으로 작성
-
-    출력 형식 지침 (꼭 지켜주세요):
-    [문항 유형: 객관식]
-    문제: 바나나가 과일이 맞는 이유를 고르세요.
-    보기:
-    1. 보기내용1
-    2. 보기내용2
-    3. 보기내용3
-    4. 보기내용4
-    정답: 1. 보기내용1
-
-    [문항 유형: 단답형]
-    문제: 바나나는 무슨 색인가요?
-    정답: 노란색
+    def __len__(self) -> int:
+        return len(self._previous_quizzes)
 
 
-    [문항 유형: 참/거짓]
-    문제: 바나나는 영어로 banana이다.
-    정답: O 또는 X
-
-    📘 강의자료:
-    {document_text}
-
-    🎧 음성 텍스트 (보조 참고용):
-    {audio_text}
-    """
-
-# 강의별 메모리 저장소 분리
 def get_lecture_memory(lecture_id: str) -> QuizMemory:
     if lecture_id not in lecture_memories:
         lecture_memories[lecture_id] = QuizMemory()
     return lecture_memories[lecture_id]
+
+
+def reset_lecture_memory(lecture_id: str) -> bool:
+    return lecture_memories.pop(lecture_id, None) is not None
+
+
+def clear_lecture_memory(lecture_id: str) -> bool:
+    mem = lecture_memories.get(lecture_id)
+    if not mem:
+        return False
+    mem.clear()
+    return True
